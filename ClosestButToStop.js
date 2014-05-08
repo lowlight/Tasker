@@ -21,44 +21,43 @@ var busarrivaltime = "0";
 //length: json.data.arrivalsAndDepartures.length
 
 for(var i = 0; i < json.data.entry.arrivalsAndDepartures.length; i++) {
-	flash("i " + i);
-	flash("route " + json.data.entry.arrivalsAndDepartures[i].routeShortName);
+	//flash("i " + i);
+	//flash("route " + json.data.entry.arrivalsAndDepartures[i].routeShortName);
 
-	/*
-	switch(json.data.arrivalsAndDepartures[i].routeShortName) {
+	switch(json.data.entry.arrivalsAndDepartures[i].routeShortName) {
 	case 216:
 		flash("case 216");
-		if(json.data.arrivalsAndDepartures[i].predictedArrivalTime == 0)
-			busarrivaltime = json.data.arrivalsAndDepartures[i].scheduledArrivalTime;
+		if(json.data.entry.arrivalsAndDepartures[[i].predictedArrivalTime == 0)
+			busarrivaltime = json.data.entry.arrivalsAndDepartures[[i].scheduledArrivalTime;
 		else
-			busarrivaltime = json.data.arrivalsAndDepartures[i].predictedArrivalTime;
+			busarrivaltime = json.data.entry.arrivalsAndDepartures[[i].predictedArrivalTime;
 		break;
 	case 218:
 		flash("case 218");
-		if(json.data.arrivalsAndDepartures[i].predictedArrivalTime == 0)
-			busarrivaltime = json.data.arrivalsAndDepartures[i].scheduledArrivalTime;
+		if(json.data.entry.arrivalsAndDepartures[[i].predictedArrivalTime == 0)
+			busarrivaltime = json.data.entry.arrivalsAndDepartures[[i].scheduledArrivalTime;
 		else
-			busarrivaltime = json.data.arrivalsAndDepartures[i].predictedArrivalTime;
+			busarrivaltime = json.data.entry.arrivalsAndDepartures[[i].predictedArrivalTime;
 		break;
 	case 219:
 		flash("case 219");
-		if(json.data.arrivalsAndDepartures[i].predictedArrivalTime == 0)
-			busarrivaltime = json.data.arrivalsAndDepartures[i].scheduledArrivalTime;
+		if(json.data.entry.arrivalsAndDepartures[[i].predictedArrivalTime == 0)
+			busarrivaltime = json.data.entry.arrivalsAndDepartures[[i].scheduledArrivalTime;
 		else
-			busarrivaltime = json.data.arrivalsAndDepartures[i].predictedArrivalTime;
+			busarrivaltime = json.data.entry.arrivalsAndDepartures[[i].predictedArrivalTime;
 		break;
 	default:
 		flash("case default");
 		//do nothing
-	}
-	*/
+	} //end switch
+	
 	/*
 	if(busarrivaltime != 0){
 		flash("busarrivaltime != 0");
 		exit();
 	}
 	*/
-}
+} //end for
 /*
 busarrivaltime = busarrivaltime / 1000;
 flash(busarrivaltime);
