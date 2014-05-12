@@ -4,6 +4,7 @@
 
 if(rtcode != 200){
 	flash("GET error " + rtcode);
+	setLocal("%busarrivaltime", "><");
 	exit();
 } 
 
