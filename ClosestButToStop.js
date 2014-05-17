@@ -2,20 +2,26 @@
  * 
  */
 
-if(rtcode != 200){
+if(rtcode != 200 || !rtres){ //check error code and that there is data being returned
 	flash("GET error " + rtcode);
 	setLocal("%busarrivaltime", "><");
 	exit();
-} 
+}
 
 var json = eval ("(" + rtres + ")");
-var timerightnow = json.currentTime;
-timerightnow = timerightnow / 1000;
+var timerightnow = 0;
+timerightnow = json.currentTime;
+if(timerightnow == 0){
+	flash("Rest returned no data");
+	setLocal("%busarrivaltime", "><");
+	exit();//no point in continuing, bailout now
+}
+
+timerightnow = timerightnow / 1000; //convert 2 seconds
 //flash("length " + json.data.entry.arrivalsAndDepartures.length);
 busarrivaltime = "00";
 
 for(var i = 0; i < json.data.entry.arrivalsAndDepartures.length; i++) {
-	//flash("route " + json.data.entry.arrivalsAndDepartures[i].routeShortName);
 	switch(json.data.entry.arrivalsAndDepartures[i].routeShortName) {
 	case 216:
 		if(json.data.entry.arrivalsAndDepartures[i].predictedArrivalTime == 0) {
@@ -41,8 +47,6 @@ for(var i = 0; i < json.data.entry.arrivalsAndDepartures.length; i++) {
 	default:
 		//do nothing
 	} //end switch
-	
-	//flash("switch " + busarrivaltime);
 
 	if(busarrivaltime != "00"){
 		busarrivaltime = busarrivaltime / 1000;
@@ -50,9 +54,7 @@ for(var i = 0; i < json.data.entry.arrivalsAndDepartures.length; i++) {
 		busarrivaltime = busarrivaltime / 60;
 		busarrivaltime = busarrivaltime.toFixed(0);
 		setLocal("%busarrivaltime", busarrivaltime);
-		//flash("set " + busarrivaltime);
 		exit();
 	} //end if
 } //end for
-//flash("end for loop");
-setLocal("%busarrivaltime", "--");
+setLocal("%busarrivaltime", "--");//no buses within timeframe set in rest call.
