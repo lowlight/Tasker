@@ -10,9 +10,9 @@ function foo()
 
 try 
 { 
-    flash("request = " + foo()); 
+    flashLong("request = " + foo()); 
 } 
 catch(e) 
 { 
-    flash(e.message); 
+    flashLong(e.message); 
 } 
