@@ -13,13 +13,14 @@
 
 
 //function to calc the minutes to bus arrival and display value
-function showMinTillArrival(timerightnow, busarrivaltime){
-	busarrivaltime = busarrivaltime / 1000;
-	busarrivaltime = timerightnow - busarrivaltime;
-	busarrivaltime = busarrivaltime / 60;
+function showMinTillArrival(timerightnow, busarrivaltime, busNum){
+	busarrivaltime -= timerightnow;
+	busarrivaltime /= 1000;
+	busarrivaltime /= 60;
 	busarrivaltime = busarrivaltime.toFixed(0);
 	setLocal("%busarrivaltime", busarrivaltime);
-	flashLong("554 arrives in " + busarrivaltime + " minutes.");
+	setLocal("%routenum", busNum);
+	flash(busNum + " arrives in " + busarrivaltime + " min");
 	exit();//i hope this kills the script......
 }
 
@@ -29,6 +30,8 @@ function showMinTillArrival(timerightnow, busarrivaltime){
 
 flash("starting script");
 setLocal("%busarrivaltime", "!!");//something unique to show the script was run
+setLocal("%routenum", "!!");
+var busNum = 0;//var to pass the bus number to showMinTillArrival
 var rtres = restCall();
 //flashLong("rtres = " + rtres);
 var json = eval ("(" + rtres + ")");
@@ -37,15 +40,15 @@ timerightnow = json.currentTime;
 if(timerightnow == 0){
 	flash("Rest returned no data");
 	setLocal("%busarrivaltime", "><");
+	setLocal("%routenum", "><");
 	exit();//no point in continuing, bailout now
 }
 
-timerightnow = timerightnow / 1000; //convert 2 seconds
+//timerightnow = timerightnow / 1000; //convert 2 seconds
 //flashLong("length " + json.data.entry.arrivalsAndDepartures.length);
 
 
 for(var i = 0; i < json.data.entry.arrivalsAndDepartures.length; i++) {
-	//flashLong(json.data.entry.arrivalsAndDepartures[i].routeShortName);
 	if(554 == json.data.entry.arrivalsAndDepartures[i].routeShortName){
 		if(json.data.entry.arrivalsAndDepartures[i].predictedArrivalTime == 0) {
 			showMinTillArrival(timerightnow, json.data.entry.arrivalsAndDepartures[i].scheduledArrivalTime);
@@ -56,3 +59,4 @@ for(var i = 0; i < json.data.entry.arrivalsAndDepartures.length; i++) {
 } //end for
 
 setLocal("%busarrivaltime", "--");//no buses within timeframe set in rest call.
+setLocal("%routenum", "--");
