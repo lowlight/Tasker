@@ -11,10 +11,13 @@ function busSchedule2Use(){
 	//else if time is 1001 - 1900 return 1
 	//else return 2
 	if(systemTime.getHours() > 5 && systemTime.getHours() < 11){
+		//flash("schedule is 0");
 		return 0;
 	} else if(systemTime.getHours() > 9 && systemTime.getHours() < 20){
+		//flash("schedule is 1");
 		return 1;
 	} else {
+		//flash("schedule is 2");
 		return 2;
 	}
 }
@@ -34,15 +37,17 @@ function getRestData(busSchedule2Use){
 	} else {
 		stopId = "320";
 	}
-	
+	//flash("stopId = " + stopId);
+
 	//build url with stopId
-	//if trouble, try single quotes in url
-	var url = "http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/1_" + stopId + ".json?key=TEST&minutesAfter=0&minutesBefore=30";
+	var url = "http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/1_" + stopId + ".json?key=TEST&minutesAfter=30&minutesBefore=0";
+	//flash(url);
 	//make REST call
 	var request = new XMLHttpRequest(); 
-    request.open("GET",url,false);
+    request.open("GET",url,false);//the true false is for synchronos
     request.send(); 
-    //check this statmentout.......
+    //TODO check the return code to see if an error was returned.
+    //flash(request.responseText);
 	return(JSON.parse(request.responseText));
 }
 
@@ -56,7 +61,8 @@ function checkArrivingBuses(objJSON, busSchedule2Use){
 		//bus data is sorted by the server, so the first hit is the closest.
 		for(i = 0; i < objJSON.data.entry.arrivalsAndDepartures.length; i++){
 			if("554E" == objJSON.data.entry.arrivalsAndDepartures[i].routeShortName || 554 == objJSON.data.entry.arrivalsAndDepartures[i].routeShortName ){
-				flashLong("arrival time = " + objJSON.data.entry.arrivalsAndDepartures[i].scheduledArrivalTime);
+				//flash("found 554 bus");
+				//TODO use the predicted arrival time.
 				return objJSON.data.entry.arrivalsAndDepartures[i].scheduledArrivalTime;
 			}
 		}
@@ -65,63 +71,42 @@ function checkArrivingBuses(objJSON, busSchedule2Use){
 		//bus data is sorted by the server, so the first hit is the closest.
 		for(i = 0; i < objJSON.data.entry.arrivalsAndDepartures.length; i++){
 			if(216 == objJSON.data.entry.arrivalsAndDepartures[i].routeShortName || 218 == objJSON.data.entry.arrivalsAndDepartures[i].routeShortName || 219 == objJSON.data.entry.arrivalsAndDepartures[i].routeShortName){
+				//flash("found 21X bus");
+				//TODO use the predicted arrival time.
 				return objJSON.data.entry.arrivalsAndDepartures[i].scheduledArrivalTime;
 			}
 		}
 		return "-1";
 	}
-
-	//foreach arrival in the objJSON do the following
-	//is it correct bus number? if yes save arrival time (discuss scheduled vs. predicted)
-	//compare future arrival times to saved one, keep the closest one
-
-	//after all comparisons, return the remaining unixTime
-	//error checking if empty
+	flash("no matching buses found");
+	return "-3";
 }
 
 /*
-*convertSoonest takes the unix time of the closest bus and converts it to a human readable number and passes that to Zooper
+*convertSoonest takes the unix time of the closest bus and converts it to a human 
+*readable number and passes that to Zooper
 *inputs: soonestUnixTime
 *returns: void
 */
 function convertSoonest(soonestUnixTime, objJSON){
 	//check if the closest bus returned a negative number, if it did, error out here.
 	if(soonestUnixTime < 0){
-		//negative num returned, this bad, stop.
+		//negative num returned, bad, stop.
 		if(soonestUnixTime == "-1"){
 			flash("No 554 bus found");
 			setLocal("%busarrivaltime", "E1");
 			exit();
 		} else {
-			flash("No 216/218/219 bus found");
+			flash("No 21x bus found");
 			setLocal("%busarrivaltime", "E2");
 			exit();
-		}
+		}//TODO expand this with other internal error codes i am using
 	}
-	if(objJSON.currentTime < 1000000){
-		//not big enough, bad
-		flash("Object current time seems wrong, time = " + objJSON.currentTime);
-		setLocal("%busarrivaltime", "E3");
-		exit();
-	}
-
-	//convert to human readable minutes
-	//use setLocal to pass this number to Zooper to be displayed on screen
-	if(objJSON.currentTime < soonestUnixTime){
-		flash("obj time < soonest time");
-		//something isn't right
-		//flash("problem with arrival time");
-		//flash("obj time = " + objJSON.currentTime);
-		//flash("bus time = " + soonestUnixTime);
-		//setLocal("%busarrivaltime", "E3");
-		//exit();
-	} 
 
 	//move on to calculations
-	var theTime;
-	theTime =  objJSON.currentTime - soonestUnixTime;
-	theTime /= 1000;
-	theTime /= 60;
+	var theTime = "E9";
+	theTime =  soonestUnixTime - objJSON.currentTime;
+	theTime /= 60000;
 	theTime = theTime.toFixed(0);
 	setLocal("%busarrivaltime", theTime);
 	flashLong("bus in " + theTime + " min");
@@ -145,5 +130,5 @@ timeClosestBus = checkArrivingBuses(objReturnedData, schedule);
 
 convertSoonest(timeClosestBus, objReturnedData);
 
-//it should be done and work perfectly......
+
 
