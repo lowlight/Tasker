@@ -7,18 +7,16 @@
 function busSchedule2Use(){
 	//get current time
 	var systemTime = new Date();
-	//if time is 0600 - 1000 return 0
-	//else if time is 1001 - 1900 return 1
-	//else return 2
-	if(systemTime.getHours() > 5 && systemTime.getHours() < 11){
-		//flash("schedule is 0");
-		return 0;
-	} else if(systemTime.getHours() > 9 && systemTime.getHours() < 20){
-		//flash("schedule is 1");
-		return 1;
+	var currentTime = systemTime.getHours + systemTime.getMinutes;
+	//if time is 0600 - 1000 return 64561
+	//else if time is 1001 - 1900 return 456
+	//else return 320
+	if(currentTime >= 0001 && currentTime <= 1100){
+		return 64561;
+	} else if(currentTime >= 1101 && currentTime <= 1900){
+		return 456;
 	} else {
-		//flash("schedule is 2");
-		return 2;
+		return 320;
 	}
 }
 
@@ -28,27 +26,21 @@ function busSchedule2Use(){
 *returns: objJSON, with data from onebusaway server
 */
 function getRestData(busSchedule2Use){
-	//get/use stopId from the busSchedule2Use variable
-	var stopId;
-	if(busSchedule2Use == 0){
-		stopId = "64561";
-	} else if(busSchedule2Use == 1){
-		stopId = "456";
-	} else {
-		stopId = "320";
-	}
-	//flash("stopId = " + stopId);
-
 	//build url with stopId
-	var url = "http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/1_" + stopId + ".json?key=TEST&minutesAfter=30&minutesBefore=0";
+	var url = "http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/1_" + busSchedule2Use + ".json?key=TEST&minutesAfter=30&minutesBefore=0";
 	//flash(url);
 	//make REST call
 	var request = new XMLHttpRequest(); 
     request.open("GET",url,false);//the true false is for synchronos
     request.send(); 
-    //TODO check the return code to see if an error was returned.
-    //flash(request.responseText);
-	return(JSON.parse(request.responseText));
+    if(request.status !== 200){
+    	//the request failed for whatever reason.
+    	flash("Bad http response");
+    	setLocal("%busarrivaltime", "E4");
+    	exit();
+    } else {
+    	return(JSON.parse(request.responseText));
+    }
 }
 
 /*
@@ -57,13 +49,17 @@ function getRestData(busSchedule2Use){
 *returns: unixTime of closest bus
 */
 function checkArrivingBuses(objJSON, busSchedule2Use){
-	if(busSchedule2Use == 2){
+	if(busSchedule2Use == 320){
 		//bus data is sorted by the server, so the first hit is the closest.
 		for(i = 0; i < objJSON.data.entry.arrivalsAndDepartures.length; i++){
-			if("554E" == objJSON.data.entry.arrivalsAndDepartures[i].routeShortName || 554 == objJSON.data.entry.arrivalsAndDepartures[i].routeShortName ){
-				//flash("found 554 bus");
-				//TODO use the predicted arrival time.
-				return objJSON.data.entry.arrivalsAndDepartures[i].scheduledArrivalTime;
+			if(554 == objJSON.data.entry.arrivalsAndDepartures[i].routeShortName ){
+				// use the predicted arrival time.
+				if(objJSON.data.entry.arrivalsAndDepartures[i].predictedArrivalTime == 0){
+					return objJSON.data.entry.arrivalsAndDepartures[i].scheduledArrivalTime;
+				} else {
+					return objJSON.data.entry.arrivalsAndDepartures[i].predictedArrivalTime;
+				}
+				
 			}
 		}
 		return "-2";
@@ -71,14 +67,17 @@ function checkArrivingBuses(objJSON, busSchedule2Use){
 		//bus data is sorted by the server, so the first hit is the closest.
 		for(i = 0; i < objJSON.data.entry.arrivalsAndDepartures.length; i++){
 			if(216 == objJSON.data.entry.arrivalsAndDepartures[i].routeShortName || 218 == objJSON.data.entry.arrivalsAndDepartures[i].routeShortName || 219 == objJSON.data.entry.arrivalsAndDepartures[i].routeShortName){
-				//flash("found 21X bus");
-				//TODO use the predicted arrival time.
-				return objJSON.data.entry.arrivalsAndDepartures[i].scheduledArrivalTime;
+				// use the predicted arrival time.
+				if(objJSON.data.entry.arrivalsAndDepartures[i].predictedArrivalTime == 0){
+					return objJSON.data.entry.arrivalsAndDepartures[i].scheduledArrivalTime;
+				} else {
+					return objJSON.data.entry.arrivalsAndDepartures[i].predictedArrivalTime;
+				}
 			}
 		}
 		return "-1";
 	}
-	flash("no matching buses found");
+	//flash("no matching buses found");
 	return "-3";
 }
 
@@ -93,18 +92,22 @@ function convertSoonest(soonestUnixTime, objJSON){
 	if(soonestUnixTime < 0){
 		//negative num returned, bad, stop.
 		if(soonestUnixTime == "-1"){
-			flash("No 554 bus found");
+			//flash("No 554 bus found");
 			setLocal("%busarrivaltime", "E1");
 			exit();
-		} else {
-			flash("No 21x bus found");
+		} if(soonestUnixTime == "-2") {
+			//flash("No 21X bus found");
 			setLocal("%busarrivaltime", "E2");
 			exit();
-		}//TODO expand this with other internal error codes i am using
+		} if(soonestUnixTime == "-3") {
+			//flash("No matching buses");
+			setLocal("%busarrivaltime", "E3");
+			exit();
+		}
 	}
 
 	//move on to calculations
-	var theTime = "E9";
+	var theTime = "E5";
 	theTime =  soonestUnixTime - objJSON.currentTime;
 	theTime /= 60000;
 	theTime = theTime.toFixed(0);

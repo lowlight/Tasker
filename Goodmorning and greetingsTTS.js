@@ -8,13 +8,13 @@ var daughterName = new String();
 var busNames = new String();
 
 //now put stuff in those arrays, probably better ways to do this
-greetings = ["Good morning", "Top of the morning", "Drop your cocks and grab your socks", "I love the smell of napalm in the monring", "What a morning"];
+greetings = ["Good morning", "Top of the morning", "Wake your lazy ass up", "I love the smell of napalm in the monring", "Get on with your day"];
 
-name = ["sir", "Mr. Joshua", "You magnificent bastard", "stud", "rock star"];
+namesForMe = ["sir", "Joshua", "you magnificent bastard", "stud", "rock star"];
 
-timeIntro = ["the time is now", "star date is", "you are late, it's"];
+timeIntro = ["the time is now", "you are late, it is"];
 
-daughterName = ["Oz's", "Ozzy's", "The princess's", "The light of your life's"];
+daughterName = ["Oz's", "Ozzy's", "The princess's", "The gromet's"];
 
 busNames = ["bus", "transport", "yellow submarine"];
 
@@ -25,11 +25,11 @@ function sayShit(speechString){
 	//get current media volume
 	var oldVolume = global('%VOLM');
 	//set media volume for TTS voice
-	setGlobal('%VOLM', 10);
+	setGlobal('%VOLM', 11);
 	var ok = say(speechString, "com.ivona.tts", "eng-GBR", "media", 5, 5);
 	//return media volume to previous value
 	setGlobal('%VOLM', oldVolume);
-	return ok;//true
+	return 1;
 }
 
 //do i need to get Az on school bus today
@@ -50,16 +50,16 @@ function getCurrentTime(){
 }
 
 //random number
-function getRandomNum(uppperLimit){
-	return((Math.random() * upperLimit) + 1);
+function getRandomNum(upperLimit){
+	return(Math.floor(Math.random() * upperLimit));
 }
 
 /****************************/
 
-morningSpeech = greetings[getRandomNum(5)] + " " + name[getRandomNum(5)] + " " + timeIntro[getRandomNum(3)] + " " + getCurrentTime(); 
+morningSpeech = greetings[getRandomNum("5")] + " " + namesForMe[getRandomNum(5)] + " " + timeIntro[getRandomNum("2")] + " " + getCurrentTime(); 
 sayShit(morningSpeech);
 
 if(schoolBusDay){
-	morningSpeech = daughterName[getRandomNum(4)] + " " + busNames[getRandomNum(3)] + " " + " will be here at 8:25";
+	morningSpeech = daughterName[getRandomNum("4")] + " " + busNames[getRandomNum("3")] + " " + " will be here at 8:30";
 	sayShit(morningSpeech);
 }
