@@ -32,10 +32,11 @@ function getCurrentWeather(){
 	//return current weather in formath that TTS can use
 	var objWeather;
 	var returnString = new String();
-	var url = "http://api.wunderground.com/api/4aa979bdbd51a31e/conditions/q/WA/Seattle.json";
+	var url = "http://api.wunderground.com/api/4aa979bdbd51a31e/conditions/q/CA/SanDiego.json";
+	//var url = "http://api.wunderground.com/api/4aa979bdbd51a31e/conditions/q/WA/Seattle.json";
 
 	objWeather = getRestData(url);
-	if(objWeather !== 200){
+	if(objWeather !== 200){//should be objWeather.status
 		returnString = " not available.";
 		return returnString;
 	} else {
