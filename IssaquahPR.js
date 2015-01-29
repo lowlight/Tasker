@@ -15,7 +15,7 @@ function getRestData(){
     if(request.status !== 200){
     	//the request failed for whatever reason.
     	flash("Bad http response");
-    	setLocal("%busarrivaltime", "E4");
+    	setLocal("%busarrivaltime", "__");
     	exit();
     } else {
     	return(JSON.parse(request.responseText));
@@ -41,8 +41,8 @@ function checkArrivingBuses(objJSON){
 				}
 			}
 		}
-		flashLong("V1 21x Fail");
-    	setLocal("%busarrivaltime", "NOBUS");
+		flashLong("v1 Fail");
+    	setLocal("%busarrivaltime", "__");
     	exit();
 	} else if(objJSON.version == "2"){
 		//do v2 stuff here
@@ -57,13 +57,13 @@ function checkArrivingBuses(objJSON){
 				}
 			}
 		}
-		flashLong("V2 21x Fail");
-    	setLocal("%busarrivaltime", "NOBUS");
+		flash("v2 Fail");
+    	setLocal("%busarrivaltime", "__");
     	exit();
 	} else {
 		//do "oh shit" here
-		flashLong("SHIT");
-    	setLocal("%busarrivaltime", "die");
+		flash("SHIT");
+    	setLocal("%busarrivaltime", "__");
     	exit();
 	}
 
@@ -78,30 +78,17 @@ function checkArrivingBuses(objJSON){
 function convertSoonest(soonestUnixTime, objJSON){
 	//check if the closest bus returned a negative number, if it did, error out here.
 	if(soonestUnixTime < 0){
-		//negative num returned, bad, stop.
-		if(soonestUnixTime == "-1"){
-			//flash("No 554 bus found");
-			setLocal("%busarrivaltime", "E1");
-			exit();
-		} if(soonestUnixTime == "-2") {
-			//flash("No 21X bus found");
-			setLocal("%busarrivaltime", "E2");
-			exit();
-		} if(soonestUnixTime == "-3") {
-			//flash("No matching buses");
-			setLocal("%busarrivaltime", "E3");
-			exit();
-		}
+		setLocal("%busarrivaltime", "__");
+		exit();
 	}
 
 	//move on to calculations
-	var theTime = "E5";
+	var theTime = "__";
 	theTime =  soonestUnixTime - objJSON.currentTime;
 	theTime /= 60000;
 	theTime = theTime.toFixed(0);
 	setLocal("%busarrivaltime", theTime);
 	flashLong("bus in " + theTime + " min");
-	return 1;
 }
 
 /***************************
